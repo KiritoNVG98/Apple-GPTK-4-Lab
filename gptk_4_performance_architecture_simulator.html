@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPTK 4 Performance & Architecture Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        apple: {
+                            dark: '#000000',
+                            card: '#1c1c1e',
+                            border: '#2c2c2e',
+                            blue: '#0071e3',
+                            purple: '#af52de',
+                            green: '#30d158',
+                            orange: '#ff9f0a',
+                            red: '#ff453a',
+                            subtext: '#8e8e93'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Helvetica Neue', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom scrollbar and smooth transitions */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0f11;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2c2c2e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3a3c;
+        }
+        .glass-panel {
+            background: rgba(28, 28, 30, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .cover-gradient {
+            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0) 100%);
+        }
+    </style>
+</head>
+<body class="bg-black text-gray-100 font-sans antialiased min-h-screen flex flex-col selection:bg-apple-blue selection:text-white">
+
+    <header class="sticky top-0 z-40 border-b border-apple-border glass-panel">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-apple-blue via-apple-purple to-pink-500 flex items-center justify-center shadow-lg shadow-apple-purple/20">
+                    <i class="fa-solid to-cpu text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-tight text-white flex items-center gap-2">
+                        GPTK 4 <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-apple-blue/20 text-apple-blue border border-apple-blue/30">PRO SIMULATOR</span>
+                    </h1>
+                    <p class="text-xs text-apple-subtext" data-i18n="subtitle">Game Porting Toolkit 4 Architectural Engine</p>
+                </div>
+            </div>
+
+            <!-- Controls (Lang & Quick Nav) -->
+            <div class="flex items-center space-x-4">
+                <nav class="hidden md:flex space-x-1 text-sm font-medium">
+                    <a href="#games" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors" data-i18n="nav-games">Giochi</a>
+                    <a href="#sandbox" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors" data-i18n="nav-sandbox">Architettura</a>
+                    <a href="#soc-scaler" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors" data-i18n="nav-soc">SoC Apple Silicon</a>
+                </nav>
+                
+                <div class="h-4 w-px bg-apple-border hidden md:block"></div>
+
+                <button id="lang-toggle" onclick="toggleLanguage()" class="px-3 py-1.5 rounded-lg bg-apple-card border border-apple-border hover:border-apple-subtext text-xs font-semibold flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-globe text-apple-blue"></i>
+                    <span id="lang-label">IT / EN</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <section class="relative rounded-3xl overflow-hidden border border-apple-border bg-gradient-to-br from-apple-card via-black to-[#120a1c] p-6 sm:p-10 shadow-2xl">
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-apple-purple/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-apple-blue/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 max-w-3xl space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-apple-purple font-medium">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span data-i18n="hero-badge">DirectX 12 Ultimate &rarr; Metal 3.2 Pipeline</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight" data-i18n="hero-title">
+                    Simulazione Prestazionale GPTK 4 per Apple Silicon
+                </h2>
+                <p class="text-apple-subtext text-base sm:text-lg leading-relaxed" data-i18n="hero-desc">
+                    Analisi architettonica in tempo reale delle tecnologie di traduzione D3D12, AOT Shader pre-compilazione, frame interpolation hardware MetalFX e Zero-Copy UMA memory mapping.
+                </p>
+                <div class="pt-2 flex flex-wrap gap-4">
+                    <a href="#sandbox" class="px-5 py-2.5 rounded-xl bg-apple-blue hover:bg-blue-600 text-white font-medium text-sm transition-all shadow-lg shadow-apple-blue/20 flex items-center gap-2">
+                        <i class="fa-solid fa-flask"></i>
+                        <span data-i18n="btn-sandbox">Apri Sandbox Architetturale</span>
+                    </a>
+                    <a href="#games" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-sm border border-white/10 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-gamepad"></i>
+                        <span data-i18n="btn-catalog">Esplora 12 Titoli AAA</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="games" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-apple-border pb-4">
+                <div>
+                    <h3 class="text-2xl font-bold text-white flex items-center gap-2" data-i18n="gallery-title">
+                        <i class="fa-solid fa-layer-group text-apple-blue"></i> Catalogo Titoli AAA & Performance GPTK 4
+                    </h3>
+                    <p class="text-sm text-apple-subtext" data-i18n="gallery-subtitle">Copertine ufficiali ad alta risoluzione con gestione automatica fallback SVG</p>
+                </div>
+                <!-- Controls -->
+                <div class="flex items-center gap-3">
+                    <select id="genre-filter" onchange="renderGames()" class="bg-apple-card border border-apple-border rounded-xl text-xs px-3 py-2 text-white focus:outline-none focus:border-apple-blue">
+                        <option value="all" data-i18n="filter-all">Tutti i Generi</option>
+                        <option value="Action RPG">Action RPG</option>
+                        <option value="Open World">Open World</option>
+                        <option value="Shooter">Shooter</option>
+                    </select>
+                    <button onclick="openCompareModal()" class="px-3 py-2 rounded-xl bg-apple-purple/20 text-apple-purple border border-apple-purple/30 text-xs font-semibold hover:bg-apple-purple/30 transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-code-compare"></i>
+                        <span data-i18n="btn-compare">Confronta Titoli</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid of 12 Games -->
+            <div id="games-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- Javascript will inject cards here -->
+            </div>
+        </section>
+
+        <section id="sandbox" class="space-y-6">
+            <div class="border-b border-apple-border pb-4">
+                <h3 class="text-2xl font-bold text-white flex items-center gap-2" data-i18n="sandbox-title">
+                    <i class="fa-solid fa-microchip text-apple-purple"></i> Sandbox Architetturale GPTK 4
+                </h3>
+                <p class="text-sm text-apple-subtext" data-i18n="sandbox-subtitle">Simula l'impatto prestazionale dei singoli layer del sottosistema grafico Metal 3.2</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Controls Panel -->
+                <div class="lg:col-span-4 bg-apple-card border border-apple-border rounded-2xl p-5 space-y-6">
+                    <h4 class="font-semibold text-white text-base border-b border-apple-border pb-2 flex items-center justify-between">
+                        <span data-i18n="sandbox-config">Configurazione Parametri</span>
+                        <i class="fa-solid fa-sliders text-apple-subtext"></i>
+                    </h4>
+
+                    <!-- Toggle Shader Compilation Mode -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-apple-subtext uppercase tracking-wider" data-i18n="lbl-shader">Compilazione Shader</label>
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-apple-border">
+                            <button id="btn-jit" onclick="setShaderMode('jit')" class="py-2 text-xs font-medium rounded-lg transition-all text-gray-400">JIT runtime</button>
+                            <button id="btn-aot" onclick="setShaderMode('aot')" class="py-2 text-xs font-medium rounded-lg bg-apple-blue text-white shadow-md">AOT Pre-compiled</button>
+                        </div>
+                    </div>
+
+                    <!-- Toggle UMA Direct Access -->
+                    <div class="flex items-center justify-between p-3 bg-black/30 rounded-xl border border-apple-border">
+                        <div>
+                            <div class="text-xs font-semibold text-white" data-i18n="lbl-uma">Zero-Copy UMA Direct Access</div>
+                            <div class="text-[10px] text-apple-subtext" data-i18n="desc-uma">Elimina la duplicazione VRAM/RAM</div>
+                        </div>
+                        <input type="checkbox" id="chk-uma" checked onchange="updateSimulation()" class="w-4 h-4 accent-apple-blue cursor-pointer">
+                    </div>
+
+                    <!-- Hardware Mesh Shaders & DXR -->
+                    <div class="flex items-center justify-between p-3 bg-black/30 rounded-xl border border-apple-border">
+                        <div>
+                            <div class="text-xs font-semibold text-white" data-i18n="lbl-mesh">Hardware Mesh Shaders / DXR</div>
+                            <div class="text-[10px] text-apple-subtext" data-i18n="desc-mesh">Accelerazione hardware Ray Tracing</div>
+                        </div>
+                        <input type="checkbox" id="chk-mesh" checked onchange="updateSimulation()" class="w-4 h-4 accent-apple-blue cursor-pointer">
+                    </div>
+
+                    <!-- MetalFX Frame Interpolation Mode -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-apple-subtext uppercase tracking-wider" data-i18n="lbl-metalfx">MetalFX Upscaling & Interpolazione</label>
+                        <select id="sel-metalfx" onchange="updateSimulation()" class="w-full bg-black/40 border border-apple-border rounded-xl text-xs p-2.5 text-white focus:outline-none focus:border-apple-blue">
+                            <option value="off" data-i18n="mfx-off">Disattivato (Nativo)</option>
+                            <option value="spatial" data-i18n="mfx-spatial">MetalFX Spatial Upscaling</option>
+                            <option value="temporal" selected data-i18n="mfx-temporal">MetalFX Temporal Anti-Aliasing</option>
+                            <option value="framegen" data-i18n="mfx-framegen">MetalFX + Frame Generation (GPTK 4)</option>
+                        </select>
+                    </div>
+
+                    <!-- Target Resolution -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-apple-subtext uppercase tracking-wider" data-i18n="lbl-res">Risoluzione Target</label>
+                        <select id="sel-res" onchange="updateSimulation()" class="w-full bg-black/40 border border-apple-border rounded-xl text-xs p-2.5 text-white focus:outline-none focus:border-apple-blue">
+                            <option value="1080p">1080p Full HD (1920x1080)</option>
+                            <option value="1440p" selected>1440p QHD (2560x1440)</option>
+                            <option value="2160p">4K UHD (3840x2160)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Simulation Output & Charts -->
+                <div class="lg:col-span-8 space-y-6">
+                    <!-- Real-time Metrics Overview -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-apple-card border border-apple-border rounded-2xl p-4 text-center">
+                            <span class="text-xs text-apple-subtext block mb-1" data-i18n="metric-fps">FPS Medi</span>
+                            <span id="metric-fps-val" class="text-2xl font-black text-apple-green">84 FPS</span>
+                        </div>
+                        <div class="bg-apple-card border border-apple-border rounded-2xl p-4 text-center">
+                            <span class="text-xs text-apple-subtext block mb-1" data-i18n="metric-latency">Latenza Frame</span>
+                            <span id="metric-lat-val" class="text-2xl font-black text-apple-blue">11.9 ms</span>
+                        </div>
+                        <div class="bg-apple-card border border-apple-border rounded-2xl p-4 text-center">
+                            <span class="text-xs text-apple-subtext block mb-1" data-i18n="metric-stutter">Stutter Index (1% low)</span>
+                            <span id="metric-stutter-val" class="text-2xl font-black text-apple-orange">Basso (0.2%)</span>
+                        </div>
+                        <div class="bg-apple-card border border-apple-border rounded-2xl p-4 text-center">
+                            <span class="text-xs text-apple-subtext block mb-1" data-i18n="metric-vram">VRAM Allocata UMA</span>
+                            <span id="metric-vram-val" class="text-2xl font-black text-apple-purple">9.4 GB</span>
+                        </div>
+                    </div>
+
+                    <!-- Chart Canvas -->
+                    <div class="bg-apple-card border border-apple-border rounded-2xl p-5 relative">
+                        <h4 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-apple-blue"></i>
+                            <span data-i18n="chart-title">Profiling del Frame Time e Bordo di Rendering (ms)</span>
+                        </h4>
+                        <div class="h-64 sm:h-72 w-full">
+                            <canvas id="sandboxChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="soc-scaler" class="space-y-6">
+            <div class="border-b border-apple-border pb-4">
+                <h3 class="text-2xl font-bold text-white flex items-center gap-2" data-i18n="soc-title">
+                    <i class="fa-solid fa-cubes text-apple-orange"></i> Comparativa Scalabilità SoC Apple Silicon
+                </h3>
+                <p class="text-sm text-apple-subtext" data-i18n="soc-subtitle">Confronta le prestazioni di GPTK 4 sulle generazioni M2, M3 e M4 (Base, Pro, Max, Ultra)</p>
+            </div>
+
+            <!-- Chips Selector Buttons -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="chip-selector-container">
+                <!-- Javascript populates interactive chip selectors -->
+            </div>
+
+            <!-- Dynamic Chip Comparison Details & Bar Chart -->
+            <div class="bg-apple-card border border-apple-border rounded-2xl p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Selected Chip Specs -->
+                <div class="lg:col-span-4 space-y-4 border-b lg:border-b-0 lg:border-r border-apple-border pb-6 lg:pb-0 lg:pr-6">
+                    <div id="chip-badge" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-apple-orange/20 text-apple-orange border border-apple-orange/30">
+                        Apple M4 Max
+                    </div>
+                    <h4 id="chip-name" class="text-2xl font-extrabold text-white">Apple M4 Max</h4>
+                    <p id="chip-desc" class="text-xs text-apple-subtext leading-relaxed">
+                        38-Core GPU con hardware Ray Tracing avanzato e 153 GB/s larghezza di banda per core.
+                    </p>
+                    
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between py-1 border-b border-white/5">
+                            <span class="text-apple-subtext" data-i18n="chip-gpu-cores">Core GPU:</span>
+                            <span id="chip-cores" class="font-semibold text-white">40 Cores</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-white/5">
+                            <span class="text-apple-subtext" data-i18n="chip-bandwidth">Larghezza di Banda:</span>
+                            <span id="chip-bw" class="font-semibold text-white">400 GB/s</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-white/5">
+                            <span class="text-apple-subtext" data-i18n="chip-tflops">Potenza Calcolo (FP32):</span>
+                            <span id="chip-tflops" class="font-semibold text-white">18.2 TFLOPS</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-apple-subtext" data-i18n="chip-efficiency">Efficienza Termica:</span>
+                            <span id="chip-eff" class="font-semibold text-apple-green">Eccellente (&lt; 45W)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SoC Comparison FPS Chart -->
+                <div class="lg:col-span-8 flex flex-col justify-between">
+                    <h4 class="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-bar text-apple-orange"></i>
+                        <span data-i18n="soc-chart-title">Prestazioni Medie a 1440p (High Preset + MetalFX)</span>
+                    </h4>
+                    <div class="h-60 w-full">
+                        <canvas id="socChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="compare-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-apple-card border border-apple-border rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 shadow-2xl relative">
+            <button onclick="closeCompareModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h3 class="text-xl font-bold text-white flex items-center gap-2" data-i18n="modal-compare-title">
+                <i class="fa-solid fa-code-compare text-apple-purple"></i> Confronto Diretto Titoli AAA
+            </h3>
+
+            <!-- Game Selectors -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs text-apple-subtext mb-1 block" data-i18n="lbl-game1">Seleziona Primo Gioco:</label>
+                    <select id="select-game-1" onchange="updateComparison()" class="w-full bg-black/50 border border-apple-border rounded-xl p-2.5 text-xs text-white">
+                        <!-- injected by js -->
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-apple-subtext mb-1 block" data-i18n="lbl-game2">Seleziona Secondo Gioco:</label>
+                    <select id="select-game-2" onchange="updateComparison()" class="w-full bg-black/50 border border-apple-border rounded-xl p-2.5 text-xs text-white">
+                        <!-- injected by js -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Comparison Output Cards -->
+            <div id="comparison-content" class="grid grid-cols-2 gap-4 sm:gap-6 pt-2">
+                <!-- Javascript populates side by side comparison -->
+            </div>
+        </div>
+    </div>
+
+    <!-- High Res Cover Zoom Modal -->
+    <div id="cover-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-lg hidden flex items-center justify-center p-4" onclick="closeCoverModal()">
+        <div class="relative max-w-md w-full flex flex-col items-center" onclick="event.stopPropagation()">
+            <button onclick="closeCoverModal()" class="absolute -top-10 right-0 text-white text-xl hover:text-apple-subtext">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="cover-modal-img-container" class="w-full rounded-2xl overflow-hidden shadow-2xl border border-white/20">
+                <!-- Image or SVG injected dynamically -->
+            </div>
+            <h4 id="cover-modal-title" class="text-lg font-bold text-white mt-4 text-center"></h4>
+            <p id="cover-modal-appid" class="text-xs text-apple-subtext text-center mt-1"></p>
+        </div>
+    </div>
+
+    <footer class="border-t border-apple-border py-8 bg-apple-card/50 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p class="text-xs text-apple-subtext" data-i18n="footer-text">
+                GPTK 4 Performance & Architecture Simulator &mdash; Progettato per sviluppatori e appassionati di Apple Silicon Gaming.
+            </p>
+            <p class="text-[10px] text-gray-600">
+                Steam loghi e titoli sono marchi registrati dei rispettivi proprietari. Fallback automatico integrato per resilienza di rete.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // -------------------------------------------------------------
+        // Data Structures: 12 AAA Games with Official Steam AppIDs & Assets
+        // -------------------------------------------------------------
+        const gamesData = [
+            {
+                id: 'wukong',
+                title: 'Black Myth: Wukong',
+                appId: '2358720',
+                genre: 'Action RPG',
+                year: '2024',
+                fpsNative: 42,
+                fpsGptk4: 78,
+                vram: '11.2 GB',
+                techs: ['DirectX 12 Ultimate', 'Unreal Engine 5.4', 'AOT Shaders'],
+                gradient: 'from-amber-700 to-red-900',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2358720/library_600x900.jpg'
+            },
+            {
+                id: 'eldenring',
+                title: 'Elden Ring',
+                appId: '1245620',
+                genre: 'Action RPG',
+                year: '2022',
+                fpsNative: 55,
+                fpsGptk4: 105,
+                vram: '8.4 GB',
+                techs: ['DirectX 12', 'Seamless UMA', 'Ray Tracing'],
+                gradient: 'from-yellow-800 to-amber-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1245620/library_600x900.jpg'
+            },
+            {
+                id: 'hogwarts',
+                title: 'Hogwarts Legacy',
+                appId: '990080',
+                genre: 'Action RPG',
+                year: '2023',
+                fpsNative: 48,
+                fpsGptk4: 88,
+                vram: '10.5 GB',
+                techs: ['DirectX 12', 'Unreal Engine 4.27', 'MetalFX Temporal'],
+                gradient: 'from-blue-900 to-indigo-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/990080/library_600x900.jpg'
+            },
+            {
+                id: 'rdr2',
+                title: 'Red Dead Redemption 2',
+                appId: '1174180',
+                genre: 'Open World',
+                year: '2019',
+                fpsNative: 50,
+                fpsGptk4: 92,
+                vram: '9.8 GB',
+                techs: ['Vulkan / D3D12 Translate', 'RAGE Engine', 'Async Compute'],
+                gradient: 'from-red-900 to-orange-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1174180/library_600x900.jpg'
+            },
+            {
+                id: 'kcd2',
+                title: 'Kingdom Come: Deliverance II',
+                appId: '1771300',
+                genre: 'Action RPG',
+                year: '2025',
+                fpsNative: 38,
+                fpsGptk4: 72,
+                vram: '12.0 GB',
+                techs: ['CryEngine Enhanced', 'DirectX 12', 'Heavy CPU Binding'],
+                gradient: 'from-amber-900 to-stone-900',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1771300/library_600x900.jpg'
+            },
+            {
+                id: 'gowr',
+                title: 'God of War Ragnarök',
+                appId: '2322010',
+                genre: 'Action RPG',
+                year: '2024',
+                fpsNative: 52,
+                fpsGptk4: 96,
+                vram: '10.1 GB',
+                techs: ['DirectX 12', 'Zero-Copy VRAM', 'Mesh Shading'],
+                gradient: 'from-sky-900 to-slate-900',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2322010/library_600x900.jpg'
+            },
+            {
+                id: 'spiderman',
+                title: "Marvel's Spider-Man Remastered",
+                appId: '1817070',
+                genre: 'Open World',
+                year: '2022',
+                fpsNative: 60,
+                fpsGptk4: 118,
+                vram: '8.9 GB',
+                techs: ['DirectX 12 Ultimate', 'Ray Traced Reflections', 'MetalFX FG'],
+                gradient: 'from-red-800 to-blue-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1817070/library_600x900.jpg'
+            },
+            {
+                id: 'witcher3',
+                title: 'The Witcher 3: Wild Hunt',
+                appId: '292030',
+                genre: 'Action RPG',
+                year: '2015',
+                fpsNative: 64,
+                fpsGptk4: 124,
+                vram: '7.5 GB',
+                techs: ['REDengine 3 DX12', 'Global Illumination', 'AOT Cache'],
+                gradient: 'from-emerald-900 to-gray-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/292030/library_600x900.jpg'
+            },
+            {
+                id: 'cyberpunk',
+                title: 'Cyberpunk 2077',
+                appId: '1091500',
+                genre: 'Open World',
+                year: '2020',
+                fpsNative: 36,
+                fpsGptk4: 74,
+                vram: '11.8 GB',
+                techs: ['Path Tracing DXR', 'DirectX 12 Ultimate', 'MetalFX Temporal'],
+                gradient: 'from-yellow-600 to-purple-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1091500/library_600x900.jpg'
+            },
+            {
+                id: 'tombraider',
+                title: 'Shadow of the Tomb Raider',
+                appId: '750920',
+                genre: 'Action RPG',
+                year: '2018',
+                fpsNative: 68,
+                fpsGptk4: 132,
+                vram: '7.1 GB',
+                techs: ['DirectX 12 Native', 'Hardware Tessellation', 'UMA Direct'],
+                gradient: 'from-teal-900 to-slate-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/750920/library_600x900.jpg'
+            },
+            {
+                id: 'bf2042',
+                title: 'Battlefield 2042 / 6',
+                appId: '1517290',
+                genre: 'Shooter',
+                year: '2021',
+                fpsNative: 58,
+                fpsGptk4: 110,
+                vram: '9.2 GB',
+                techs: ['Frostbite Engine', 'DirectX 12', '128-Player Mesh Compute'],
+                gradient: 'from-cyan-900 to-blue-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1517290/library_600x900.jpg'
+            },
+            {
+                id: 'agent007',
+                title: '007 First Light',
+                appId: '2358720', // Reference Steam ID for preview
+                genre: 'Action RPG',
+                year: '2026',
+                fpsNative: 44,
+                fpsGptk4: 82,
+                vram: '10.8 GB',
+                techs: ['Glacier Engine DX12', 'MetalFX Frame Generation', 'Ray Tracing'],
+                gradient: 'from-neutral-800 to-zinc-950',
+                coverUrl: 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/2358720/library_600x900.jpg'
+            }
+        ];
+
+        // -------------------------------------------------------------
+        // Apple Silicon Chip Profiles Data
+        // -------------------------------------------------------------
+        const chipProfiles = [
+            { id: 'm2base', name: 'Apple M2', cores: 10, bw: '100 GB/s', tflops: '3.6 TFLOPS', eff: 'Ottima (< 20W)', scale: 0.55, desc: 'SoC entry level con eccellente efficienza energetica.' },
+            { id: 'm2pro', name: 'Apple M2 Pro', cores: 19, bw: '200 GB/s', tflops: '6.8 TFLOPS', eff: 'Ottima (< 30W)', scale: 0.75, desc: 'Prestazioni solide per gaming 1080p e 1440p bilanciato.' },
+            { id: 'm3max', name: 'Apple M3 Max', cores: 40, bw: '300 GB/s', tflops: '14.2 TFLOPS', eff: 'Molto Buona (< 45W)', scale: 1.15, desc: 'Integrazione hardware Dynamic Caching e Ray Tracing.' },
+            { id: 'm4max', name: 'Apple M4 Max', cores: 40, bw: '400 GB/s', tflops: '18.2 TFLOPS', eff: 'Eccellente (< 45W)', scale: 1.35, desc: 'Architettura di punta per il massimo throughput GPTK 4.' },
+            { id: 'm4ultra', name: 'Apple M4 Ultra', cores: 80, bw: '800 GB/s', tflops: '36.4 TFLOPS', eff: 'Massima (< 90W)', scale: 1.85, desc: 'Doppio die UltraFusion per risoluzioni 4K native e Frame Gen.' }
+        ];
+
+        // -------------------------------------------------------------
+        // i18n Translations Dictionary
+        // -------------------------------------------------------------
+        const translations = {
+            it: {
+                subtitle: 'Game Porting Toolkit 4 Architectural Engine',
+                'nav-games': 'Giochi',
+                'nav-sandbox': 'Architettura',
+                'nav-soc': 'SoC Apple Silicon',
+                'hero-badge': 'Pipeline DirectX 12 Ultimate \u2192 Metal 3.2',
+                'hero-title': 'Simulazione Prestazionale GPTK 4 per Apple Silicon',
+                'hero-desc': 'Analisi architettonica in tempo reale delle tecnologie di traduzione D3D12, AOT Shader pre-compilazione, frame interpolation hardware MetalFX e Zero-Copy UMA memory mapping.',
+                'btn-sandbox': 'Apri Sandbox Architetturale',
+                'btn-catalog': 'Esplora 12 Titoli AAA',
+                'gallery-title': 'Catalogo Titoli AAA & Performance GPTK 4',
+                'gallery-subtitle': 'Copertine ufficiali ad alta risoluzione con gestione automatica fallback SVG',
+                'filter-all': 'Tutti i Generi',
+                'btn-compare': 'Confronta Titoli',
+                'sandbox-title': 'Sandbox Architetturale GPTK 4',
+                'sandbox-subtitle': 'Simula l\'impatto prestazionale dei singoli layer del sottosistema grafico Metal 3.2',
+                'sandbox-config': 'Configurazione Parametri',
+                'lbl-shader': 'Compilazione Shader',
+                'lbl-uma': 'Zero-Copy UMA Direct Access',
+                'desc-uma': 'Elimina la duplicazione VRAM/RAM',
+                'lbl-mesh': 'Hardware Mesh Shaders / DXR',
+                'desc-mesh': 'Accelerazione hardware Ray Tracing',
+                'lbl-metalfx': 'MetalFX Upscaling & Interpolazione',
+                'mfx-off': 'Disattivato (Nativo)',
+                'mfx-spatial': 'MetalFX Spatial Upscaling',
+                'mfx-temporal': 'MetalFX Temporal Anti-Aliasing',
+                'mfx-framegen': 'MetalFX + Frame Generation (GPTK 4)',
+                'lbl-res': 'Risoluzione Target',
+                'metric-fps': 'FPS Medi',
+                'metric-latency': 'Latenza Frame',
+                'metric-stutter': 'Stutter Index (1% low)',
+                'metric-vram': 'VRAM Allocata UMA',
+                'chart-title': 'Profiling del Frame Time e Bordo di Rendering (ms)',
+                'soc-title': 'Comparativa Scalabilità SoC Apple Silicon',
+                'soc-subtitle': 'Confronta le prestazioni di GPTK 4 sulle generazioni M2, M3 e M4 (Base, Pro, Max, Ultra)',
+                'chip-gpu-cores': 'Core GPU:',
+                'chip-bandwidth': 'Larghezza di Banda:',
+                'chip-tflops': 'Potenza Calcolo (FP32):',
+                'chip-efficiency': 'Efficienza Termica:',
+                'soc-chart-title': 'Prestazioni Medie a 1440p (High Preset + MetalFX)',
+                'modal-compare-title': 'Confronto Diretto Titoli AAA',
+                'lbl-game1': 'Seleziona Primo Gioco:',
+                'lbl-game2': 'Seleziona Secondo Gioco:',
+                'footer-text': 'GPTK 4 Performance & Architecture Simulator \u2014 Progettato per sviluppatori e appassionati di Apple Silicon Gaming.'
+            },
+            en: {
+                subtitle: 'Game Porting Toolkit 4 Architectural Engine',
+                'nav-games': 'Games',
+                'nav-sandbox': 'Architecture',
+                'nav-soc': 'Apple Silicon SoC',
+                'hero-badge': 'DirectX 12 Ultimate \u2192 Metal 3.2 Pipeline',
+                'hero-title': 'GPTK 4 Performance Simulation for Apple Silicon',
+                'hero-desc': 'Real-time architectural analysis of D3D12 translation layers, AOT Shader pre-compilation, MetalFX hardware frame interpolation, and Zero-Copy UMA memory mapping.',
+                'btn-sandbox': 'Open Architecture Sandbox',
+                'btn-catalog': 'Explore 12 AAA Titles',
+                'gallery-title': 'AAA Titles Catalog & GPTK 4 Performance',
+                'gallery-subtitle': 'High-resolution official posters with resilient SVG card fallback system',
+                'filter-all': 'All Genres',
+                'btn-compare': 'Compare Games',
+                'sandbox-title': 'GPTK 4 Architecture Sandbox',
+                'sandbox-subtitle': 'Simulate the performance impact of each Metal 3.2 graphics subsystem layer',
+                'sandbox-config': 'Parameter Setup',
+                'lbl-shader': 'Shader Compilation',
+                'lbl-uma': 'Zero-Copy UMA Direct Access',
+                'desc-uma': 'Eliminates VRAM/RAM duplication',
+                'lbl-mesh': 'Hardware Mesh Shaders / DXR',
+                'desc-mesh': 'Hardware Ray Tracing acceleration',
+                'lbl-metalfx': 'MetalFX Upscaling & Interpolation',
+                'mfx-off': 'Disabled (Native)',
+                'mfx-spatial': 'MetalFX Spatial Upscaling',
+                'mfx-temporal': 'MetalFX Temporal Anti-Aliasing',
+                'mfx-framegen': 'MetalFX + Frame Generation (GPTK 4)',
+                'lbl-res': 'Target Resolution',
+                'metric-fps': 'Average FPS',
+                'metric-latency': 'Frame Latency',
+                'metric-stutter': 'Stutter Index (1% low)',
+                'metric-vram': 'UMA Allocated VRAM',
+                'chart-title': 'Frame Time & Render Edge Profiling (ms)',
+                'soc-title': 'Apple Silicon SoC Scalability Comparison',
+                'soc-subtitle': 'Compare GPTK 4 performance across M2, M3, and M4 chip generations (Base, Pro, Max, Ultra)',
+                'chip-gpu-cores': 'GPU Cores:',
+                'chip-bandwidth': 'Memory Bandwidth:',
+                'chip-tflops': 'Compute Power (FP32):',
+                'chip-efficiency': 'Thermal Efficiency:',
+                'soc-chart-title': 'Average Performance at 1440p (High Preset + MetalFX)',
+                'modal-compare-title': 'Direct AAA Titles Comparison',
+                'lbl-game1': 'Select First Game:',
+                'lbl-game2': 'Select Second Game:',
+                'footer-text': 'GPTK 4 Performance & Architecture Simulator \u2014 Crafted for developers and Apple Silicon gaming enthusiasts.'
+            }
+        };
+
+        let currentLang = 'it';
+        let currentShaderMode = 'aot';
+        let selectedChipId = 'm4max';
+        let sandboxChartInstance = null;
+        let socChartInstance = null;
+
+        function generateSvgPoster(title, appId, gradient) {
+            return `
+                <div class="w-full h-full bg-gradient-to-br ${gradient} flex flex-col justify-between p-4 relative overflow-hidden select-none">
+                    <div class="absolute -right-6 -bottom-6 text-white/5 text-8xl font-black">M4</div>
+                    <div class="flex items-center justify-between z-10">
+                        <span class="text-[10px] font-extrabold tracking-widest text-white/70 uppercase">GPTK 4 READY</span>
+                        <i class="fa-solid fa-microchip text-white/60 text-xs"></i>
+                    </div>
+                    <div class="z-10 my-auto py-6">
+                        <h4 class="font-extrabold text-white text-base leading-snug drop-shadow-md">${title}</h4>
+                        <p class="text-[10px] text-white/70 mt-1 font-mono">AppID: ${appId}</p>
+                    </div>
+                    <div class="z-10 pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-white/80">
+                        <span>Apple Silicon</span>
+                        <span class="px-1.5 py-0.5 rounded bg-white/20 font-semibold">Metal 3.2</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGames() {
+            const container = document.getElementById('games-grid');
+            const genreFilter = document.getElementById('genre-filter').value;
+            container.innerHTML = '';
+
+            const filtered = gamesData.filter(g => genreFilter === 'all' || g.genre === genreFilter);
+
+            filtered.forEach(game => {
+                const card = document.createElement('div');
+                card.className = "group bg-apple-card border border-apple-border rounded-2xl overflow-hidden shadow-lg hover:border-apple-blue/50 transition-all duration-300 flex flex-col cursor-pointer";
+                card.onclick = () => openCoverModal(game);
+
+                card.innerHTML = `
+                    <div class="relative aspect-[2/3] w-full overflow-hidden bg-zinc-900">
+                        <img src="${game.coverUrl}" 
+                             alt="${game.title}" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='${generateSvgPoster(game.title, game.appId, game.gradient).replace(/'/g, "\\'")}';" />
+                        <div class="absolute inset-0 cover-gradient opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                        <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-apple-green font-bold border border-white/10">
+                            +${Math.round(((game.fpsGptk4 - game.fpsNative) / game.fpsNative) * 100)}% FPS
+                        </div>
+                        <div class="absolute bottom-2 left-2 right-2">
+                            <span class="text-[10px] font-semibold text-apple-subtext block uppercase tracking-wider">${game.genre}</span>
+                            <h4 class="font-bold text-sm text-white truncate leading-tight">${game.title}</h4>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-apple-card flex-grow flex flex-col justify-between space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-apple-subtext">GPTK 4:</span>
+                            <span class="font-black text-apple-green">${game.fpsGptk4} FPS</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] text-apple-subtext">
+                            <span>GPTK 3 Native:</span>
+                            <span class="line-through text-gray-500">${game.fpsNative} FPS</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'it' ? 'en' : 'it';
+            document.getElementById('lang-label').innerText = currentLang === 'it' ? 'IT / EN' : 'EN / IT';
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerText = translations[currentLang][key];
+                }
+            });
+
+            renderChipSelectors();
+            updateSimulation();
+            updateComparison();
+        }
+
+        function setShaderMode(mode) {
+            currentShaderMode = mode;
+            const btnJit = document.getElementById('btn-jit');
+            const btnAot = document.getElementById('btn-aot');
+
+            if (mode === 'aot') {
+                btnAot.className = "py-2 text-xs font-medium rounded-lg bg-apple-blue text-white shadow-md";
+                btnJit.className = "py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white";
+            } else {
+                btnJit.className = "py-2 text-xs font-medium rounded-lg bg-apple-blue text-white shadow-md";
+                btnAot.className = "py-2 text-xs font-medium rounded-lg text-gray-400 hover:text-white";
+            }
+            updateSimulation();
+        }
+
+        function updateSimulation() {
+            const isUma = document.getElementById('chk-uma').checked;
+            const isMesh = document.getElementById('chk-mesh').checked;
+            const metalfx = document.getElementById('sel-metalfx').value;
+            const resolution = document.getElementById('sel-res').value;
+
+            // Base metrics Calculation algorithm
+            let baseFps = 60;
+            let latency = 16.6;
+            let stutterText = currentLang === 'it' ? 'Basso (0.2%)' : 'Low (0.2%)';
+            let vramVal = 9.4;
+
+            if (currentShaderMode === 'jit') {
+                baseFps -= 14;
+                latency += 6.2;
+                stutterText = currentLang === 'it' ? 'Elevato (4.8%)' : 'High (4.8%)';
+            }
+
+            if (!isUma) {
+                baseFps -= 10;
+                vramVal += 4.2;
+                latency += 3.5;
+            }
+
+            if (isMesh) {
+                baseFps += 12;
+            }
+
+            if (metalfx === 'spatial') {
+                baseFps *= 1.25;
+                latency -= 1.5;
+            } else if (metalfx === 'temporal') {
+                baseFps *= 1.45;
+                latency -= 2.0;
+            } else if (metalfx === 'framegen') {
+                baseFps *= 1.85;
+                latency += 1.2; // Frame Gen adds tiny buffer latency
+            }
+
+            if (resolution === '1080p') baseFps *= 1.25;
+            if (resolution === '2160p') baseFps *= 0.65;
+
+            const finalFps = Math.round(baseFps);
+            const finalLat = (1000 / finalFps).toFixed(1);
+
+            document.getElementById('metric-fps-val').innerText = `${finalFps} FPS`;
+            document.getElementById('metric-lat-val').innerText = `${finalLat} ms`;
+            document.getElementById('metric-stutter-val').innerText = stutterText;
+            document.getElementById('metric-vram-val').innerText = `${vramVal.toFixed(1)} GB`;
+
+            renderSandboxChart(finalFps, currentShaderMode);
+        }
+
+        function renderSandboxChart(targetFps, mode) {
+            const ctx = document.getElementById('sandboxChart').getContext('2d');
+            const dataPoints = 20;
+            const labels = Array.from({length: dataPoints}, (_, i) => `F${i+1}`);
+            
+            const baseMs = 1000 / targetFps;
+            const points = labels.map((_, i) => {
+                let spike = (mode === 'jit' && i % 4 === 0) ? Math.random() * 12 : Math.random() * 2;
+                return parseFloat((baseMs + spike).toFixed(2));
+            });
+
+            if (sandboxChartInstance) {
+                sandboxChartInstance.destroy();
+            }
+
+            sandboxChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: currentLang === 'it' ? 'Latenza Frame (ms)' : 'Frame Latency (ms)',
+                        data: points,
+                        borderColor: '#0071e3',
+                        backgroundColor: 'rgba(0, 113, 227, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#af52de'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8e8e93' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8e8e93' }, min: 0 }
+                    }
+                }
+            });
+        }
+
+        function renderChipSelectors() {
+            const container = document.getElementById('chip-selector-container');
+            container.innerHTML = '';
+
+            chipProfiles.forEach(chip => {
+                const btn = document.createElement('button');
+                const isSelected = chip.id === selectedChipId;
+                btn.className = `p-3 rounded-2xl border text-left transition-all ${
+                    isSelected 
+                        ? 'bg-apple-orange/20 border-apple-orange text-white' 
+                        : 'bg-apple-card border-apple-border text-apple-subtext hover:border-white/20'
+                }`;
+                btn.onclick = () => {
+                    selectedChipId = chip.id;
+                    renderChipSelectors();
+                    updateChipDetails();
+                };
+                btn.innerHTML = `
+                    <div class="text-xs font-bold text-white">${chip.name}</div>
+                    <div class="text-[10px] mt-0.5">${chip.cores} GPU Cores</div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function updateChipDetails() {
+            const chip = chipProfiles.find(c => c.id === selectedChipId);
+            if (!chip) return;
+
+            document.getElementById('chip-badge').innerText = chip.name;
+            document.getElementById('chip-name').innerText = chip.name;
+            document.getElementById('chip-desc').innerText = chip.desc;
+            document.getElementById('chip-cores').innerText = `${chip.cores} Cores`;
+            document.getElementById('chip-bw').innerText = chip.bw;
+            document.getElementById('chip-tflops').innerText = chip.tflops;
+            document.getElementById('chip-eff').innerText = chip.eff;
+
+            renderSocChart();
+        }
+
+        function renderSocChart() {
+            const ctx = document.getElementById('socChart').getContext('2d');
+            const labels = chipProfiles.map(c => c.name);
+            const data = chipProfiles.map(c => Math.round(72 * c.scale));
+
+            if (socChartInstance) {
+                socChartInstance.destroy();
+            }
+
+            socChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'FPS (1440p High)',
+                        data: data,
+                        backgroundColor: chipProfiles.map(c => c.id === selectedChipId ? '#ff9f0a' : 'rgba(255, 159, 10, 0.3)'),
+                        borderColor: '#ff9f0a',
+                        borderWidth: 1,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#8e8e93', font: { size: 10 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8e8e93' }, min: 0 }
+                    }
+                }
+            });
+        }
+
+        function openCompareModal() {
+            const modal = document.getElementById('compare-modal');
+            const sel1 = document.getElementById('select-game-1');
+            const sel2 = document.getElementById('select-game-2');
+
+            sel1.innerHTML = '';
+            sel2.innerHTML = '';
+
+            gamesData.forEach((g, idx) => {
+                sel1.innerHTML += `<option value="${g.id}" ${idx === 0 ? 'selected' : ''}>${g.title}</option>`;
+                sel2.innerHTML += `<option value="${g.id}" ${idx === 1 ? 'selected' : ''}>${g.title}</option>`;
+            });
+
+            updateComparison();
+            modal.classList.remove('hidden');
+        }
+
+        function closeCompareModal() {
+            document.getElementById('compare-modal').classList.add('hidden');
+        }
+
+        function updateComparison() {
+            const id1 = document.getElementById('select-game-1').value;
+            const id2 = document.getElementById('select-game-2').value;
+
+            const g1 = gamesData.find(g => g.id === id1);
+            const g2 = gamesData.find(g => g.id === id2);
+
+            const container = document.getElementById('comparison-content');
+            if (!g1 || !g2) return;
+
+            const renderCard = (game) => `
+                <div class="bg-black/40 border border-apple-border rounded-2xl p-4 space-y-3">
+                    <div class="aspect-[2/3] w-full rounded-xl overflow-hidden bg-zinc-900 relative">
+                        <img src="${game.coverUrl}" 
+                             class="w-full h-full object-cover" 
+                             onerror="this.onerror=null; this.parentElement.innerHTML='${generateSvgPoster(game.title, game.appId, game.gradient).replace(/'/g, "\\'")}';" />
+                    </div>
+                    <h4 class="font-extrabold text-white text-sm truncate">${game.title}</h4>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex justify-between py-1 border-b border-white/5">
+                            <span class="text-apple-subtext">GPTK 4 FPS:</span>
+                            <span class="font-bold text-apple-green">${game.fpsGptk4} FPS</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-white/5">
+                            <span class="text-apple-subtext">GPTK 3 FPS:</span>
+                            <span class="text-gray-400">${game.fpsNative} FPS</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-white/5">
+                            <span class="text-apple-subtext">VRAM UMA:</span>
+                            <span class="text-white">${game.vram}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = renderCard(g1) + renderCard(g2);
+        }
+
+        function openCoverModal(game) {
+            const modal = document.getElementById('cover-modal');
+            const imgContainer = document.getElementById('cover-modal-img-container');
+            const titleEl = document.getElementById('cover-modal-title');
+            const appidEl = document.getElementById('cover-modal-appid');
+
+            titleEl.innerText = game.title;
+            appidEl.innerText = `Steam AppID: ${game.appId} | ${game.genre} (${game.year})`;
+
+            imgContainer.innerHTML = `
+                <img src="${game.coverUrl}" 
+                     alt="${game.title}" 
+                     class="w-full aspect-[2/3] object-cover" 
+                     onerror="this.onerror=null; this.parentElement.innerHTML='${generateSvgPoster(game.title, game.appId, game.gradient).replace(/'/g, "\\'")}';" />
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeCoverModal() {
+            document.getElementById('cover-modal').classList.add('hidden');
+        }
+
+        // Close Modals on ESC Key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeCompareModal();
+                closeCoverModal();
+            }
+        });
+
+        window.onload = function() {
+            renderGames();
+            renderChipSelectors();
+            updateChipDetails();
+            updateSimulation();
+        };
+    </script>
+</body>
+</html>
