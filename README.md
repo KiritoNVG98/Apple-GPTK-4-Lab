@@ -50,4 +50,4 @@ open index.html
 
 Distributed under the MIT License. See LICENSE for details.
 
-Copyright (c) 2026 Danilo Otupacca
+Copyright (c) 2026 Danilo O.
