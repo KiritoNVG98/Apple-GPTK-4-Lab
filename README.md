@@ -2,7 +2,7 @@
 
 An interactive, real-time visual sandbox and benchmark suite simulating the performance translation layer of Apple Game Porting Toolkit 4 (GPTK 4) and Metal 4.
 
-Created & Maintained by Danilo Otupacca.
+Created & Maintained by Danilo O.
 
 ✨ Features
 
@@ -37,7 +37,7 @@ Charts: Chart.js
 No build tools or Node.js environment required! Simply open index.html in any modern web browser:
 
 # Clone the repository
-git clone [https://github.com/your-username/gptk4-lab-simulator.git](https://github.com/KiritoNVG98/Apple-GPTK-4-Lab/tree/main)
+git clone (https://github.com/KiritoNVG98/Apple-GPTK-4-Lab/tree/main)
 
 # Navigate to directory
 cd gptk4-lab-simulator
