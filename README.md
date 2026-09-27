@@ -37,7 +37,7 @@ Charts: Chart.js
 No build tools or Node.js environment required! Simply open index.html in any modern web browser:
 
 # Clone the repository
-git clone https://github.com/your-username/gptk4-lab-simulator.git
+git clone [https://github.com/your-username/gptk4-lab-simulator.git](https://github.com/KiritoNVG98/Apple-GPTK-4-Lab/tree/main)
 
 # Navigate to directory
 cd gptk4-lab-simulator
