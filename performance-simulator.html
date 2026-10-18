@@ -670,6 +670,15 @@
             `;
         }
 
+        // Fallback poster when a Steam cover cannot be loaded
+        function showPosterFallback(img, gameId) {
+            img.onerror = null;
+            const game = gamesData.find(g => g.id === gameId);
+            if (game && img.parentElement) {
+                img.outerHTML = generateSvgPoster(game.title, game.appId, game.gradient);
+            }
+        }
+
         function renderGames() {
             const container = document.getElementById('games-grid');
             const genreFilter = document.getElementById('genre-filter').value;
@@ -687,7 +696,7 @@
                         <img src="${game.coverUrl}" 
                              alt="${game.title}" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                             onerror="this.onerror=null; this.parentElement.innerHTML='${generateSvgPoster(game.title, game.appId, game.gradient).replace(/'/g, "\\'")}';" />
+                             onerror="showPosterFallback(this, '${game.id}')" />
                         <div class="absolute inset-0 cover-gradient opacity-80 group-hover:opacity-90 transition-opacity"></div>
                         <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-[10px] text-apple-green font-bold border border-white/10">
                             +${Math.round(((game.fpsGptk4 - game.fpsNative) / game.fpsNative) * 100)}% FPS
@@ -950,7 +959,7 @@
                     <div class="aspect-[2/3] w-full rounded-xl overflow-hidden bg-zinc-900 relative">
                         <img src="${game.coverUrl}" 
                              class="w-full h-full object-cover" 
-                             onerror="this.onerror=null; this.parentElement.innerHTML='${generateSvgPoster(game.title, game.appId, game.gradient).replace(/'/g, "\\'")}';" />
+                             onerror="showPosterFallback(this, '${game.id}')" />
                     </div>
                     <h4 class="font-extrabold text-white text-sm truncate">${game.title}</h4>
                     <div class="space-y-1.5 text-xs">
@@ -986,7 +995,7 @@
                 <img src="${game.coverUrl}" 
                      alt="${game.title}" 
                      class="w-full aspect-[2/3] object-cover" 
-                     onerror="this.onerror=null; this.parentElement.innerHTML='${generateSvgPoster(game.title, game.appId, game.gradient).replace(/'/g, "\\'")}';" />
+                     onerror="showPosterFallback(this, '${game.id}')" />
             `;
 
             modal.classList.remove('hidden');

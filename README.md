@@ -1,53 +1,59 @@
-⚡ Apple GPTK 4 Lab & Benchmark Simulator
+# ⚡ Apple GPTK 4 Lab & Benchmark Simulator
 
-An interactive, real-time visual sandbox and benchmark suite simulating the performance translation layer of Apple Game Porting Toolkit 4 (GPTK 4) and Metal 4.
+An interactive, real-time visual sandbox and benchmark suite simulating the DirectX 12 → Metal 4 translation layer of **Apple Game Porting Toolkit 4 (GPTK 4)** on Apple Silicon.
 
-Created & Maintained by Danilo O.
+Created & maintained by **Danilo O.**
 
-✨ Features
+> 🇮🇹 **Apple GPTK 4 Lab** è uno strumento interattivo per esplorare le innovazioni architetturali di GPTK 4 e Metal 4: simula l'impatto prestazionale delle singole fasi della pipeline di traduzione DirectX 12 → Metal e confronta i benchmark dei principali giochi su vari SoC Apple Silicon (serie M2, M3 e M4). Interfaccia completa in Italiano e Inglese.
 
-🎮 Architectural Pipeline Sandbox: Tweak translation pipeline bottlenecks live:
+---
 
-Shader Compilation: JIT vs. AOT Ahead-of-Time caching
+## 📂 Pages
 
-Memory Model: Buffer Copy vs. Zero-Copy Unified Memory Architecture (UMA)
+| File | Description |
+| --- | --- |
+| [`index.html`](./index.html) | **Lab & Benchmark Simulator** – architectural pipeline sandbox, real-time render stream and benchmark explorer. |
+| [`performance-simulator.html`](./performance-simulator.html) | **Performance & Architecture Simulator** – AAA game library with GPTK 3 vs GPTK 4 FPS, side-by-side comparison and Apple Silicon SoC chart. |
 
-Geometry Shaders: CPU Fallback vs. Native Metal 4 Mesh Shader pipeline
+## ✨ Features
 
-Upscaling & Frame Gen: Spatial & Temporal MetalFX + Optical Flow Frame Interpolation
+- 🎮 **Architectural Pipeline Sandbox** – tweak translation pipeline bottlenecks live:
+  - Shader compilation: JIT vs. AOT (ahead-of-time caching)
+  - Memory model: buffer copy vs. zero-copy Unified Memory Architecture (UMA)
+  - Geometry shaders: CPU fallback vs. native Metal 4 mesh shader pipeline
+  - Upscaling & frame generation: spatial & temporal MetalFX + optical-flow frame interpolation
+  - Thread sync: software barriers vs. hardware x86 TSO memory ordering on ARM64
+- 📈 **Real-Time Render Simulation** – HTML5 Canvas wireframe render stream with live frame-time (ms) charts and stutter-risk meters.
+- 📊 **Benchmark Explorer** – GPTK 3 vs. GPTK 4 across Apple Silicon chips (M2, M3 Pro, M4 Max) and demanding DirectX 12 titles (Cyberpunk 2077, 007 First Light, Battlefield 6) at 1080p, 1440p and 4K.
+- 🇮🇹 / 🇬🇧 **Dual language** – full Italian / English interface toggle.
 
-Thread Sync: Software barriers vs. Hardware ARM64 x86 TSO memory mapping
+## 🛠️ Tech Stack
 
-📈 Real-Time Render Simulation: Interactive HTML5 Canvas wireframe render stream paired with live frame-time latency charts (ms) and stutter risk meters.
+- Single-file vanilla JavaScript (ES6+) & HTML5 Canvas
+- Tailwind CSS (CDN) & FontAwesome 6
+- Chart.js
 
-📊 Benchmark Explorer: Direct comparison between GPTK 3 and GPTK 4 across Apple Silicon chips (M2, M3 Pro, M4 Max) and demanding DirectX 12 titles (Cyberpunk 2077, 007 First Light, Battlefield 6).
+## 🚀 Quick Start
 
-🇮🇹/🇬🇧 Dual Language Support: Complete bilingual interface toggle (Italian & English).
+No build tools or Node.js required – just open the page in any modern browser (Safari, Chrome, Firefox, Edge). An internet connection is needed to load the CDN libraries.
 
-🛠️ Tech Stack
-
-Frontend: Single-file Vanilla JavaScript (ES6+), HTML5 Canvas
-
-Styling: Tailwind CSS & FontAwesome 6
-
-Charts: Chart.js
-
-🚀 Quick Start
-
-No build tools or Node.js environment required! Simply open index.html in any modern web browser:
-
+```bash
 # Clone the repository
-git clone (https://github.com/KiritoNVG98/Apple-GPTK-4-Lab/tree/main)
+git clone https://github.com/KiritoNVG98/Apple-GPTK-4-Lab.git
 
-# Navigate to directory
-cd gptk4-lab-simulator
+# Enter the directory
+cd Apple-GPTK-4-Lab
 
-# Open index.html in your browser
+# Open the simulator (macOS)
 open index.html
+```
 
+## ⚠️ Disclaimer
 
-⚖️ License & Copyright
+This is an independent, educational simulation. Performance figures are modelled estimates, not official measurements. Not affiliated with or endorsed by Apple Inc.
 
-Distributed under the MIT License. See LICENSE for details.
+## ⚖️ License
+
+Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 
 Copyright (c) 2026 Danilo O.
